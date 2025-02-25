@@ -1,0 +1,165 @@
+Here’s a list of important and commonly used **MongoDB queries**:
+
+### **1. Database Operations**
+- **Show all databases**  
+  ```js
+  show dbs
+  ```
+- **Select a database**  
+  ```js
+  use database_name
+  ```
+- **Show current database**  
+  ```js
+  db
+  ```
+
+### **2. Collection Operations**
+- **Show all collections**  
+  ```js
+  show collections
+  ```
+- **Create a collection**  
+  ```js
+  db.createCollection("collection_name")
+  ```
+- **Drop a collection**  
+  ```js
+  db.collection_name.drop()
+  ```
+
+### **3. CRUD (Create, Read, Update, Delete) Operations**
+#### **Insert Documents**
+- **Insert one document**  
+  ```js
+  db.collection_name.insertOne({ key: "value" })
+  ```
+- **Insert multiple documents**  
+  ```js
+  db.collection_name.insertMany([{ key1: "value1" }, { key2: "value2" }])
+  ```
+
+#### **Read Documents**
+- **Find all documents**  
+  ```js
+  db.collection_name.find()
+  ```
+- **Find with conditions**  
+  ```js
+  db.collection_name.find({ key: "value" })
+  ```
+- **Find a single document**  
+  ```js
+  db.collection_name.findOne({ key: "value" })
+  ```
+- **Find with specific fields (projection)**  
+  ```js
+  db.collection_name.find({ key: "value" }, { field1: 1, field2: 1, _id: 0 })
+  ```
+
+#### **Update Documents**
+- **Update one document**  
+  ```js
+  db.collection_name.updateOne({ key: "value" }, { $set: { key: "new_value" } })
+  ```
+- **Update multiple documents**  
+  ```js
+  db.collection_name.updateMany({ key: "value" }, { $set: { key: "new_value" } })
+  ```
+- **Replace a document**  
+  ```js
+  db.collection_name.replaceOne({ key: "value" }, { newKey: "newValue" })
+  ```
+
+#### **Delete Documents**
+- **Delete one document**  
+  ```js
+  db.collection_name.deleteOne({ key: "value" })
+  ```
+- **Delete multiple documents**  
+  ```js
+  db.collection_name.deleteMany({ key: "value" })
+  ```
+
+### **4. Query Operators**
+- **$gt, $lt, $gte, $lte (Greater/Less Than)**  
+  ```js
+  db.collection_name.find({ age: { $gt: 18 } })
+  ```
+- **$in, $nin (Match multiple values)**  
+  ```js
+  db.collection_name.find({ key: { $in: ["value1", "value2"] } })
+  ```
+- **$or (OR condition)**  
+  ```js
+  db.collection_name.find({ $or: [{ key1: "value1" }, { key2: "value2" }] })
+  ```
+- **$and (AND condition)**  
+  ```js
+  db.collection_name.find({ $and: [{ key1: "value1" }, { key2: "value2" }] })
+  ```
+- **$exists (Check if field exists)**  
+  ```js
+  db.collection_name.find({ key: { $exists: true } })
+  ```
+
+### **5. Sorting, Limiting & Counting**
+- **Sort results**  
+  ```js
+  db.collection_name.find().sort({ key: 1 }) // Ascending
+  db.collection_name.find().sort({ key: -1 }) // Descending
+  ```
+- **Limit results**  
+  ```js
+  db.collection_name.find().limit(5)
+  ```
+- **Skip results**  
+  ```js
+  db.collection_name.find().skip(5)
+  ```
+- **Count documents**  
+  ```js
+  db.collection_name.countDocuments({ key: "value" })
+  ```
+
+### **6. Aggregation Queries**
+- **Basic Aggregation**  
+  ```js
+  db.collection_name.aggregate([{ $group: { _id: "$key", count: { $sum: 1 } } }])
+  ```
+- **Aggregation with filtering**  
+  ```js
+  db.collection_name.aggregate([
+    { $match: { key: "value" } },
+    { $group: { _id: "$key", count: { $sum: 1 } } }
+  ])
+  ```
+
+### **7. Indexing**
+- **Create an index**  
+  ```js
+  db.collection_name.createIndex({ key: 1 })
+  ```
+- **Show indexes**  
+  ```js
+  db.collection_name.getIndexes()
+  ```
+- **Drop an index**  
+  ```js
+  db.collection_name.dropIndex("index_name")
+  ```
+
+### **8. Other Useful Commands**
+- **Check Collection Size**  
+  ```js
+  db.collection_name.stats()
+  ```
+- **Check Database Stats**  
+  ```js
+  db.stats()
+  ```
+- **Drop a database**  
+  ```js
+  db.dropDatabase()
+  ```
+

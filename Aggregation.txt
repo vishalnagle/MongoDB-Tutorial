@@ -1,0 +1,188 @@
+### **Indexing and Aggregation in MongoDB**
+
+MongoDB provides powerful **indexing** and **aggregation** features to enhance query performance and enable complex data transformations.
+
+---
+
+## **1. Indexing in MongoDB**
+### **What is an Index?**
+An **index** in MongoDB is a data structure that improves the speed of queries by allowing MongoDB to find documents more efficiently. Without an index, MongoDB performs a **collection scan**, which is slow for large datasets.
+
+### **Types of Indexes in MongoDB**
+1. **Single Field Index**  
+   - Created on a single field in a document.  
+   - Example:  
+     ```js
+     db.users.createIndex({ name: 1 }) // 1 for ascending order
+     ```
+   - Queries using `name` will be faster.
+
+2. **Compound Index**  
+   - Created on multiple fields.  
+   - Example:  
+     ```js
+     db.orders.createIndex({ userId: 1, createdAt: -1 }) // Sorts userId ascending, createdAt descending
+     ```
+   - Helps with queries filtering by `userId` and sorting by `createdAt`.
+
+3. **Multikey Index**  
+   - Used for indexing arrays.  
+   - Example:  
+     ```js
+     db.products.createIndex({ tags: 1 })
+     ```
+   - Helps with queries like `{ tags: "electronics" }`.
+
+4. **Text Index**  
+   - Used for full-text search in strings.  
+   - Example:  
+     ```js
+     db.articles.createIndex({ content: "text" })
+     ```
+   - Supports `\$text` queries.
+
+5. **Geospatial Index**  
+   - Used for location-based queries.  
+   - Example:  
+     ```js
+     db.places.createIndex({ location: "2dsphere" })
+     ```
+   - Supports `\$near` queries.
+
+6. **Hashed Index**  
+   - Used for sharded collections.  
+   - Example:  
+     ```js
+     db.users.createIndex({ email: "hashed" })
+     ```
+
+### **How to View Existing Indexes?**
+```js
+db.users.getIndexes()
+```
+
+### **Removing an Index**
+```js
+db.users.dropIndex("name_1")
+```
+
+### **Checking Index Usage**
+To check if a query is using an index:
+```js
+db.users.find({ name: "John" }).explain("executionStats")
+```
+
+---
+
+## **2. Aggregation in MongoDB**
+### **What is Aggregation?**
+Aggregation in MongoDB is used to process and transform data by applying operations like filtering, grouping, and sorting.
+
+### **Aggregation Pipeline**
+MongoDB uses a pipeline-based approach where data passes through multiple **stages**, each performing a specific operation.
+
+### **Common Aggregation Stages**
+1. **`$match`** → Filters documents (similar to `find()`).  
+   ```js
+   db.orders.aggregate([
+     { $match: { status: "delivered" } }
+   ])
+   ```
+
+2. **`$group`** → Groups documents and performs aggregations.  
+   ```js
+   db.orders.aggregate([
+     { $group: { _id: "$customerId", total: { $sum: "$amount" } } }
+   ])
+   ```
+   - Groups by `customerId` and calculates total amount spent.
+
+3. **`$project`** → Selects specific fields and modifies structure.  
+   ```js
+   db.users.aggregate([
+     { $project: { name: 1, email: 1, _id: 0 } }
+   ])
+   ```
+   - Returns only `name` and `email`, hiding `_id`.
+
+4. **`$sort`** → Sorts documents.  
+   ```js
+   db.products.aggregate([
+     { $sort: { price: -1 } }
+   ])
+   ```
+   - Sorts products by `price` in descending order.
+
+5. **`$limit`** → Limits number of documents.  
+   ```js
+   db.orders.aggregate([
+     { $limit: 5 }
+   ])
+   ```
+   - Returns the first 5 documents.
+
+6. **`$skip`** → Skips a certain number of documents.  
+   ```js
+   db.orders.aggregate([
+     { $skip: 10 }
+   ])
+   ```
+   - Skips the first 10 documents.
+
+7. **`$lookup`** → Performs SQL-like joins.  
+   ```js
+   db.orders.aggregate([
+     {
+       $lookup: {
+         from: "users",
+         localField: "userId",
+         foreignField: "_id",
+         as: "userDetails"
+       }
+     }
+   ])
+   ```
+   - Joins `orders` with `users` collection.
+
+8. **`$unwind`** → Deconstructs an array field into separate documents.  
+   ```js
+   db.products.aggregate([
+     { $unwind: "$tags" }
+   ])
+   ```
+   - Splits each element of `tags` array into separate documents.
+
+9. **`$addFields`** → Adds new fields to documents.  
+   ```js
+   db.users.aggregate([
+     { $addFields: { fullName: { $concat: ["$firstName", " ", "$lastName"] } } }
+   ])
+   ```
+
+10. **`$out`** → Saves aggregation results to a new collection.  
+    ```js
+    db.orders.aggregate([
+      { $match: { status: "completed" } },
+      { $out: "completed_orders" }
+    ])
+    ```
+
+---
+
+## **Indexing vs Aggregation: When to Use What?**
+| Feature    | Indexing | Aggregation |
+|------------|---------|------------|
+| **Purpose** | Improves query performance | Transforms and processes data |
+| **Usage** | Applied before queries | Used when fetching data |
+| **Example** | Searching for a user by name | Grouping orders by customer |
+| **Performance Impact** | Speeds up queries | Can be slow for large data without indexes |
+
+---
+
+## **Best Practices**
+- Use indexes on frequently queried fields.
+- Avoid overusing indexes (each index adds storage overhead).
+- Use the **aggregation pipeline** for data transformation instead of multiple queries.
+- Optimize aggregation performance by using **`$match`** early in the pipeline.
+- Use **explain()** to analyze query performance.
+

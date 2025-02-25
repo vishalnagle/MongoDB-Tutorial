@@ -1,0 +1,227 @@
+# Introduction to MongoDB
+
+## What is MongoDB?
+MongoDB is a NoSQL, document-oriented database that stores data in JSON-like BSON (Binary JSON) format. 
+It is designed for high performance, scalability, and flexibility.
+
+## Features of MongoDB
+- **Schema-less**: Documents can have different structures.
+- **Scalability**: Supports horizontal scaling using sharding.
+- **High Performance**: Optimized for read and write operations.
+- **Indexing**: Various indexing strategies improve query performance.
+- **Replication**: Provides high availability using replica sets.
+- **Aggregation Framework**: Powerful data processing and analytics.
+
+## NoSQL vs. SQL
+| Feature       | NoSQL (MongoDB) | SQL (Relational DB) |
+|--------------|---------------|------------------|
+| Data Model   | Document-oriented | Table-based |
+| Schema       | Dynamic         | Fixed schema |
+| Scalability  | Horizontally scalable | Vertically scalable |
+| Transactions | Supported (multi-document) | ACID-compliant |
+| Joins        | No joins, uses embedded docs | Supports joins |
+
+## Document-Oriented Database
+Unlike relational databases, MongoDB stores data as **documents** in **collections** rather than rows and tables. Each document is a JSON-like structure with key-value pairs.
+
+---
+# Installation & Setup
+
+## Installing MongoDB on Windows/Linux/macOS
+1. Download MongoDB from [mongodb.com](https://www.mongodb.com/try/download/community).
+2. Follow installation steps for your OS.
+3. Start MongoDB server using:
+   ```sh
+   mongod --dbpath <your_data_directory>
+   ```
+
+## MongoDB Shell (mongosh)
+A command-line interface for interacting with MongoDB.
+```sh
+mongosh
+```
+
+## MongoDB Compass (GUI)
+A graphical user interface to visualize and interact with databases.
+
+## Connecting to MongoDB
+To connect to a local instance:
+```sh
+mongosh "mongodb://localhost:27017"
+```
+
+---
+# MongoDB Data Model
+
+## Databases, Collections, Documents
+- **Database**: Logical container for collections.
+- **Collection**: Group of related documents.
+- **Document**: JSON-like data structure.
+
+Example document:
+```json
+{
+  "name": "Alice",
+  "age": 25,
+  "skills": ["MongoDB", "Node.js"]
+}
+```
+
+## JSON & BSON Format
+- **JSON**: Human-readable data format.
+- **BSON**: Binary format optimized for MongoDB.
+
+## Schema Design Basics
+- **Embedding**: Store related data within a single document.
+- **Referencing**: Use document IDs to link related data.
+
+---
+# CRUD Operations
+
+## Create
+### insertOne()
+```sh
+db.users.insertOne({ "name": "Alice", "age": 25 })
+```
+### insertMany()
+```sh
+db.users.insertMany([
+  { "name": "Bob", "age": 30 },
+  { "name": "Charlie", "age": 28 }
+])
+```
+
+## Read
+### findOne()
+```sh
+db.users.findOne({ "name": "Alice" })
+```
+### find() with filters
+```sh
+db.users.find({ "age": { "$gt": 25 } })
+```
+
+## Update
+### updateOne()
+```sh
+db.users.updateOne({ "name": "Alice" }, { "$set": { "age": 26 } })
+```
+### updateMany()
+```sh
+db.users.updateMany({}, { "$set": { "status": "active" } })
+```
+
+## Delete
+### deleteOne()
+```sh
+db.users.deleteOne({ "name": "Alice" })
+```
+### deleteMany()
+```sh
+db.users.deleteMany({ "age": { "$lt": 25 } })
+```
+
+---
+# Indexes in MongoDB
+
+## Types of Indexes
+- **Single-field**: Index on one field.
+- **Compound**: Index on multiple fields.
+- **Text**: Full-text search support.
+- **Geospatial**: Supports location-based queries.
+
+## Creating Indexes
+```sh
+db.users.createIndex({ "name": 1 })
+```
+
+## Dropping Indexes
+```sh
+db.users.dropIndex("name_1")
+```
+
+---
+# Aggregation Framework (Basics)
+
+## Introduction to Aggregation
+Aggregation is used to process data and return computed results.
+
+### Example pipeline
+```sh
+db.users.aggregate([
+  { "$match": { "age": { "$gt": 25 } } },
+  { "$group": { "_id": "$age", "count": { "$sum": 1 } } }
+])
+```
+
+## Common Operators
+- **$match**: Filters documents.
+- **$group**: Groups documents.
+- **$project**: Reshapes documents.
+- **$sort**: Sorts results.
+- **$limit**: Limits number of results.
+- **$skip**: Skips documents.
+
+---
+# Data Relationships in MongoDB
+
+## Embedded Documents
+```json
+{
+  "name": "Alice",
+  "address": {
+    "city": "New York",
+    "zip": "10001"
+  }
+}
+```
+
+## References
+Manual reference:
+```sh
+db.orders.insertOne({ "user_id": ObjectId("6123abc456def7890"), "total": 100 })
+```
+
+## Relationships
+- **One-to-One**: Store reference ID in another collection.
+- **One-to-Many**: Embed array of objects.
+- **Many-to-Many**: Use reference arrays.
+
+---
+# MongoDB Transactions (Basics)
+
+## ACID Transactions in MongoDB
+Ensures atomicity for multi-document operations.
+
+### Example Transaction
+```sh
+const session = db.getMongo().startSession();
+session.startTransaction();
+try {
+  db.users.updateOne({ "name": "Alice" }, { "$inc": { "balance": -50 } }, { session });
+  db.accounts.updateOne({ "account": "Alice123" }, { "$inc": { "balance": 50 } }, { session });
+  session.commitTransaction();
+} catch (e) {
+  session.abortTransaction();
+}
+```
+
+---
+# MongoDB Security Basics
+
+## Authentication & Authorization
+- **Authentication**: Verifies users.
+- **Authorization**: Assigns permissions.
+
+## Role-Based Access Control (RBAC)
+Example of creating a user:
+```sh
+db.createUser({
+  user: "admin",
+  pwd: "password",
+  roles: [{ role: "readWrite", db: "testDB" }]
+})
+```
+
+This document provides an in-depth introduction to MongoDB with examples.
+
